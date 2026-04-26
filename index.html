@@ -17,7 +17,7 @@
         .team-name { width: 35%; font-weight: bold; font-size: 0.95em; color: #eee; }
         button { background: #00ff88; color: #000; border: none; padding: 18px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1em; margin: 20px 0; transition: 0.3s; width: 100%; box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2); }
         button:hover { background: #00cc6e; transform: translateY(-2px); }
-        .rodada-label { color: #00ff88; font-size: 0.8em; margin-top: 25px; display: block; border-left: 3px solid #00ff88; padding-left: 10px; text-transform: uppercase; }
+        .rodada-label { color: #00ff88; font-size: 0.8em; margin-top: 25px; display: block; border-left: 3px solid #00ff88; padding-left: 10px; text-transform: uppercase; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -45,31 +45,38 @@
 
         <button onclick="atualizarTabela()">💾 ATUALIZAR CLASSIFICAÇÃO</button>
 
-        <span class="rodada-label">CONFRONTOS DE IDA E VOLTA</span>
+        <span class="rodada-label">CONFRONTOS DIRETOS (IDA E VOLTA SEGUIDOS)</span>
         <div id="jogos"></div>
     </div>
 
     <script>
         const jogadores = ["SCARLLXD", "EoLuckyzinJr", "Vitor90show", "VitinhoRJ"];
         
+        // Reorganizado para Ida e Volta seguidos por confronto
         const confrontos = [
-            ["SCARLLXD", "EoLuckyzinJr"], ["Vitor90show", "VitinhoRJ"],
-            ["SCARLLXD", "Vitor90show"], ["EoLuckyzinJr", "VitinhoRJ"],
-            ["SCARLLXD", "VitinhoRJ"], ["EoLuckyzinJr", "Vitor90show"],
-            ["EoLuckyzinJr", "SCARLLXD"], ["VitinhoRJ", "Vitor90show"],
-            ["Vitor90show", "SCARLLXD"], ["VitinhoRJ", "EoLuckyzinJr"],
-            ["VitinhoRJ", "SCARLLXD"], ["Vitor90show", "EoLuckyzinJr"]
+            ["SCARLLXD", "EoLuckyzinJr"], ["EoLuckyzinJr", "SCARLLXD"], // Lucas vs Lucky
+            ["Vitor90show", "VitinhoRJ"], ["VitinhoRJ", "Vitor90show"], // Vitor vs Vitinho
+            ["SCARLLXD", "Vitor90show"], ["Vitor90show", "SCARLLXD"], // Lucas vs Vitor
+            ["EoLuckyzinJr", "VitinhoRJ"], ["VitinhoRJ", "EoLuckyzinJr"], // Lucky vs Vitinho
+            ["SCARLLXD", "VitinhoRJ"], ["VitinhoRJ", "SCARLLXD"],      // Lucas vs VitinhoRJ
+            ["EoLuckyzinJr", "Vitor90show"], ["Vitor90show", "EoLuckyzinJr"] // Lucky vs Vitor
         ];
 
         function inicializar() {
             const divJogos = document.getElementById('jogos');
+            divJogos.innerHTML = ""; // Limpa antes de gerar
             confrontos.forEach((par, i) => {
+                // Adiciona uma divisória visual a cada 2 jogos para separar os confrontos
+                if (i % 2 === 0 && i !== 0) {
+                    divJogos.innerHTML += '<hr style="border: 0; border-top: 1px dashed #333; margin: 15px 0;">';
+                }
+                
                 divJogos.innerHTML += `
                     <div class="match-card">
                         <span class="team-name" style="text-align: right;">${par[0]}</span>
-                        <input type="number" class="input-score" id="s1-${i}" placeholder="0">
+                        <input type="number" class="input-score" id="s1-${i}" placeholder="0" oninput="atualizarTabela()">
                         <span style="color: #555">X</span>
-                        <input type="number" class="input-score" id="s2-${i}" placeholder="0">
+                        <input type="number" class="input-score" id="s2-${i}" placeholder="0" oninput="atualizarTabela()">
                         <span class="team-name" style="text-align: left;">${par[1]}</span>
                     </div>
                 `;
@@ -79,27 +86,40 @@
 
         function atualizarTabela() {
             let stats = {};
+            // Reinicia os stats para garantir contagem limpa
             jogadores.forEach(j => stats[j] = { pts: 0, pj: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0 });
 
             confrontos.forEach((par, i) => {
                 let v1 = document.getElementById(`s1-${i}`).value;
                 let v2 = document.getElementById(`s2-${i}`).value;
 
+                // Só conta se ambos os campos estiverem preenchidos
                 if (v1 !== "" && v2 !== "") {
                     let s1 = parseInt(v1);
                     let s2 = parseInt(v2);
+                    let timeA = par[0];
+                    let timeB = par[1];
 
-                    stats[par[0]].pj++; stats[par[1]].pj++;
-                    stats[par[0]].gp += s1; stats[par[1]].gp += s2;
-                    stats[par[0]].gc += s2; stats[par[1]].gc += s1;
+                    stats[timeA].pj++; 
+                    stats[timeB].pj++;
+                    stats[timeA].gp += s1; 
+                    stats[timeB].gp += s2;
+                    stats[timeA].gc += s2; 
+                    stats[timeB].gc += s1;
 
                     if (s1 > s2) { 
-                        stats[par[0]].pts += 3; stats[par[0]].v++; stats[par[1]].d++;
+                        stats[timeA].pts += 3; 
+                        stats[timeA].v++; 
+                        stats[timeB].d++; // Contabiliza a derrota do adversário
                     } else if (s2 > s1) { 
-                        stats[par[1]].pts += 3; stats[par[1]].v++; stats[par[0]].d++;
+                        stats[timeB].pts += 3; 
+                        stats[timeB].v++; 
+                        stats[timeA].d++; // Contabiliza a derrota do adversário
                     } else { 
-                        stats[par[0]].pts += 1; stats[par[1]].pts += 1; 
-                        stats[par[0]].e++; stats[par[1]].e++;
+                        stats[timeA].pts += 1; 
+                        stats[timeB].pts += 1; 
+                        stats[timeA].e++; 
+                        stats[timeB].e++;
                     }
                 }
             });
@@ -108,6 +128,7 @@
                 name, ...stats[name], sg: stats[name].gp - stats[name].gc 
             }));
 
+            // Critérios: Pontos > Vitórias > Saldo de Gols > Gols Pró
             ranking.sort((a, b) => b.pts - a.pts || b.v - a.v || b.sg - a.sg || b.gp - a.gp);
 
             const corpo = document.getElementById('corpo-tabela');

@@ -24,7 +24,7 @@
 
     <div class="container">
         <h1>🏆 BRASILEIRÃO EFOOTBALL</h1>
-        <p>LIGA OFICIAL X1 - SCARLLXD, EoLuckyzinJr, Vitor90show, VitinhoRJ</p>
+        <p>LIGA OFICIAL X1 - SCARLLXD, EoLuckyzinJr, Vitor90show, VitinhoRJ, Bened</p>
 
         <table id="tabela">
             <thead>
@@ -50,23 +50,30 @@
     </div>
 
     <script>
-        const jogadores = ["SCARLLXD", "EoLuckyzinJr", "Vitor90show", "VitinhoRJ"];
+        // Lista atualizada com o novo integrante "Bened"
+        const jogadores = ["SCARLLXD", "EoLuckyzinJr", "Vitor90show", "VitinhoRJ", "Bened"];
         
-        // Reorganizado para Ida e Volta seguidos por confronto
-        const confrontos = [
-            ["SCARLLXD", "EoLuckyzinJr"], ["EoLuckyzinJr", "SCARLLXD"], // Lucas vs Lucky
-            ["Vitor90show", "VitinhoRJ"], ["VitinhoRJ", "Vitor90show"], // Vitor vs Vitinho
-            ["SCARLLXD", "Vitor90show"], ["Vitor90show", "SCARLLXD"], // Lucas vs Vitor
-            ["EoLuckyzinJr", "VitinhoRJ"], ["VitinhoRJ", "EoLuckyzinJr"], // Lucky vs Vitinho
-            ["SCARLLXD", "VitinhoRJ"], ["VitinhoRJ", "SCARLLXD"],      // Lucas vs VitinhoRJ
-            ["EoLuckyzinJr", "Vitor90show"], ["Vitor90show", "EoLuckyzinJr"] // Lucky vs Vitor
-        ];
+        let confrontos = [];
+
+        // Função para gerar confrontos de ida e volta seguidos automaticamente para qualquer número de jogadores
+        function gerarConfrontos() {
+            confrontos = [];
+            for (let i = 0; i < jogadores.length; i++) {
+                for (let j = i + 1; j < jogadores.length; j++) {
+                    // Adiciona Jogo de Ida e Jogo de Volta logo em seguida
+                    confrontos.push([jogadores[i], jogadores[j]]);
+                    confrontos.push([jogadores[j], jogadores[i]]);
+                }
+            }
+        }
 
         function inicializar() {
+            gerarConfrontos();
             const divJogos = document.getElementById('jogos');
-            divJogos.innerHTML = ""; // Limpa antes de gerar
+            divJogos.innerHTML = ""; 
+
             confrontos.forEach((par, i) => {
-                // Adiciona uma divisória visual a cada 2 jogos para separar os confrontos
+                // Linha divisória a cada par de jogos (Ida e Volta)
                 if (i % 2 === 0 && i !== 0) {
                     divJogos.innerHTML += '<hr style="border: 0; border-top: 1px dashed #333; margin: 15px 0;">';
                 }
@@ -86,15 +93,14 @@
 
         function atualizarTabela() {
             let stats = {};
-            // Reinicia os stats para garantir contagem limpa
             jogadores.forEach(j => stats[j] = { pts: 0, pj: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0 });
 
             confrontos.forEach((par, i) => {
                 let v1 = document.getElementById(`s1-${i}`).value;
                 let v2 = document.getElementById(`s2-${i}`).value;
 
-                // Só conta se ambos os campos estiverem preenchidos
-                if (v1 !== "" && v2 !== "") {
+                // Correção para aceitar 0x0: verifica se o campo não está vazio
+                if (v1.trim() !== "" && v2.trim() !== "") {
                     let s1 = parseInt(v1);
                     let s2 = parseInt(v2);
                     let timeA = par[0];
@@ -110,11 +116,11 @@
                     if (s1 > s2) { 
                         stats[timeA].pts += 3; 
                         stats[timeA].v++; 
-                        stats[timeB].d++; // Contabiliza a derrota do adversário
+                        stats[timeB].d++; 
                     } else if (s2 > s1) { 
                         stats[timeB].pts += 3; 
                         stats[timeB].v++; 
-                        stats[timeA].d++; // Contabiliza a derrota do adversário
+                        stats[timeA].d++; 
                     } else { 
                         stats[timeA].pts += 1; 
                         stats[timeB].pts += 1; 
@@ -128,7 +134,6 @@
                 name, ...stats[name], sg: stats[name].gp - stats[name].gc 
             }));
 
-            // Critérios: Pontos > Vitórias > Saldo de Gols > Gols Pró
             ranking.sort((a, b) => b.pts - a.pts || b.v - a.v || b.sg - a.sg || b.gp - a.gp);
 
             const corpo = document.getElementById('corpo-tabela');

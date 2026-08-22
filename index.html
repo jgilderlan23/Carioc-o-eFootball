@@ -1,24 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brasileirão eFootball</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h1 { text-align: center; color: #ffcc00; }
+        p { text-align: center; color: #bbb; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #2a2a2a; }
+        th, td { border: 1px solid #444; padding: 10px; text-align: center; }
+        th { background-color: #333; color: #ffcc00; }
+        .jogos-container { margin-top: 20px; background: #222; padding: 15px; border-radius: 5px; }
+        .jogo-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        input[type="number"] { width: 40px; text-align: center; background: #333; color: #fff; border: 1px solid #555; padding: 5px; }
+    </style>
+</head>
+<body onload="inicializar()">
 
-<div class="container">
+    <div class="container">
         <h1>🏆 BRASILEIRÃO EFOOTBALL</h1>
         <p>LIGA OFICIAL X1 - bringmetheorizo, EoLuckyzinJr, Vitor90show, VitinhoRJ, Bened, FPETOP, W7masterzz</p>
 
+        <div class="jogos-container" id="jogos"></div>
+
         <table id="tabela">
             <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Jogador</th>
+                    <th>Pts</th>
+                    <th>PJ</th>
+                    <th>V</th>
+                    <th>E</th>
+                    <th>D</th>
+                    <th>GP</th>
+                    <th>GC</th>
+                    <th>SG</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-tabela">
+                <!-- Preenchido via JavaScript -->
+            </tbody>
+        </table>
     </div>
 
     <script>
-        // Lista atualizada com os novos integrantes e a alteração do nome
         const jogadores = ["bringmetheorizo", "EoLuckyzinJr", "Vitor90show", "VitinhoRJ", "Bened", "FPETOP", "W7masterzz"];
-
         let confrontos = [];
 
-        // Função para gerar confrontos de ida e volta seguidos automaticamente para qualquer número de jogadores
         function gerarConfrontos() {
             confrontos = [];
             for (let i = 0; i < jogadores.length; i++) {
                 for (let j = i + 1; j < jogadores.length; j++) {
-                    // Adiciona Jogo de Ida e Jogo de Volta logo em seguida
                     confrontos.push([jogadores[i], jogadores[j]]);
                     confrontos.push([jogadores[j], jogadores[i]]);
                 }
@@ -31,27 +66,34 @@
             divJogos.innerHTML = ""; 
 
             confrontos.forEach((par, i) => {
-                // Linha divisória a cada par de jogos (Ida e Volta)
                 if (i % 2 === 0 && i !== 0) {
-                    divJogos.innerHTML += '<hr style="border: 0; border-top: 1px dashed #333; margin: 15px 0;">';
+                    divJogos.innerHTML += '<hr style="border: 0; border-top: 1px dashed #444; margin: 15px 0;">';
                 }
-                // (O restante da criação dos inputs de jogos continua igual na sua estrutura...)
+                divJogos.innerHTML += `
+                    <div class="jogo-item">
+                        <span>${par[0]}</span>
+                        <div>
+                            <input type="number" id="s1-${i}" oninput="atualizarTabela()" min="0"> x 
+                            <input type="number" id="s2-${i}" oninput="atualizarTabela()" min="0">
+                        </div>
+                        <span>${par[1]}</span>
+                    </div>
+                `;
             });
+            atualizarTabela();
         }
 
         function atualizarTabela() {
             let stats = {};
-            // Reinicia os stats para garantir contagem limpa
             jogadores.forEach(j => stats[j] = { pts: 0, pj: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0 });
 
             confrontos.forEach((par, i) => {
-                let v1 = document.getElementById(`s1-${i}`).value;
-                let v2 = document.getElementById(`s2-${i}`).value;
-
-                // Correção para aceitar 0x0: verifica se o campo não está vazio
-                if (v1.trim() !== "" && v2.trim() !== "") {
-                    let s1 = parseInt(v1);
-                    let s2 = parseInt(v2);
+                let el1 = document.getElementById(`s1-${i}`);
+                let el2 = document.getElementById(`s2-${i}`);
+                
+                if (el1 && el2 && el1.value.trim() !== "" && el2.value.trim() !== "") {
+                    let s1 = parseInt(el1.value);
+                    let s2 = parseInt(el2.value);
                     let timeA = par[0];
                     let timeB = par[1];
 
@@ -84,10 +126,28 @@
                 name, ...stats[name], sg: stats[name].gp - stats[name].gc 
             }));
 
-            // Critérios: Pontos > Vitórias > Saldo de Gols > Gols Pró
             ranking.sort((a, b) => b.pts - a.pts || b.v - a.v || b.sg - a.sg || b.gp - a.gp);
 
             const corpo = document.getElementById('corpo-tabela');
-            // (Atualização do HTML da tabela...)
+            corpo.innerHTML = "";
+
+            ranking.forEach((item, index) => {
+                corpo.innerHTML += `
+                    <tr>
+                        <td>${index + 1}º</td>
+                        <td><b>${item.name}</b></td>
+                        <td>${item.pts}</td>
+                        <td>${item.pj}</td>
+                        <td>${item.v}</td>
+                        <td>${item.e}</td>
+                        <td>${item.d}</td>
+                        <td>${item.gp}</td>
+                        <td>${item.gc}</td>
+                        <td>${item.sg}</td>
+                    </tr>
+                `;
+            });
         }
     </script>
+</body>
+</html>

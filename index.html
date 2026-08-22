@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brasileirão eFootball</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h1 { text-align: center; color: #ffcc00; }
+        p { text-align: center; color: #bbb; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #2a2a2a; }
+        th, td { border: 1px solid #444; padding: 10px; text-align: center; }
+        th { background-color: #333; color: #ffcc00; }
+        .jogos-container { margin-top: 20px; background: #222; padding: 15px; border-radius: 5px; }
+        .jogo-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        input[type="number"] { width: 40px; text-align: center; background: #333; color: #fff; border: 1px solid #555; padding: 5px; }
+    </style>
 </head>
 <body onload="inicializar()">
 
@@ -11,11 +23,11 @@
         <h1>🏆 BRASILEIRÃO EFOOTBALL</h1>
         <p>LIGA OFICIAL X1 - bringmetheorizo, EoLuckyzinJr, Vitor90show, VitinhoRJ, Bened, FPETOP, W7masterzz</p>
 
-        <div id="jogos"></div>
+        <div class="jogos-container" id="jogos"></div>
 
-        <table id="tabela" border="1" style="width:100%; border-collapse: collapse; margin-top: 20px; text-align: center;">
+        <table id="tabela">
             <thead>
-                <tr style="background-color: #f2f2f2;">
+                <tr>
                     <th>Pos</th>
                     <th>Jogador</th>
                     <th>Pts</th>
@@ -55,13 +67,15 @@
 
             confrontos.forEach((par, i) => {
                 if (i % 2 === 0 && i !== 0) {
-                    divJogos.innerHTML += '<hr style="border: 0; border-top: 1px dashed #333; margin: 15px 0;">';
+                    divJogos.innerHTML += '<hr style="border: 0; border-top: 1px dashed #444; margin: 15px 0;">';
                 }
                 divJogos.innerHTML += `
-                    <div style="margin-bottom: 8px;">
+                    <div class="jogo-item">
                         <span>${par[0]}</span>
-                        <input type="number" id="s1-${i}" oninput="atualizarTabela()" style="width: 35px; text-align: center;" min="0"> x 
-                        <input type="number" id="s2-${i}" oninput="atualizarTabela()" style="width: 35px; text-align: center;" min="0">
+                        <div>
+                            <input type="number" id="s1-${i}" oninput="atualizarTabela()" min="0"> x 
+                            <input type="number" id="s2-${i}" oninput="atualizarTabela()" min="0">
+                        </div>
                         <span>${par[1]}</span>
                     </div>
                 `;

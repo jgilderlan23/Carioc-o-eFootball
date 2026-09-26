@@ -3,28 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brasileirão eFootball</title>
+    <title>Cariocão eFootball</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        h1 { text-align: center; color: #ffcc00; }
-        p { text-align: center; color: #bbb; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #2a2a2a; }
-        th, td { border: 1px solid #444; padding: 10px; text-align: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 20px; }
+        .container { max-width: 950px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+        h1 { text-align: center; color: #ffcc00; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        p { text-align: center; color: #aaa; margin-top: 0; font-size: 14px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #2a2a2a; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #444; padding: 12px 8px; text-align: center; font-size: 14px; }
         th { background-color: #333; color: #ffcc00; }
-        .jogos-container { margin-top: 20px; background: #222; padding: 15px; border-radius: 5px; }
-        .jogo-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        input[type="number"] { width: 40px; text-align: center; background: #333; color: #fff; border: 1px solid #555; padding: 5px; }
+        
+        .jogos-container { margin-top: 20px; background: #222; padding: 15px; border-radius: 8px; max-height: 450px; overflow-y: auto; }
+        .confronto-bloco { background: #2a2a2a; padding: 12px; margin-bottom: 12px; border-radius: 6px; border-left: 4px solid #ffcc00; }
+        .confronto-titulo { font-weight: bold; color: #ffcc00; margin-bottom: 10px; font-size: 14px; text-align: center; }
+        
+        .jogo-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 4px; }
+        
+        .team-info { display: flex; align-items: center; gap: 8px; width: 160px; }
+        .team-info.right { justify-content: flex-end; text-align: right; }
+        .team-info.left { justify-content: flex-start; text-align: left; }
+        
+        .escudo { width: 24px; height: 24px; object-fit: contain; }
+        
+        input[type="number"] { width: 45px; text-align: center; background: #333; color: #fff; border: 1px solid #555; padding: 6px; border-radius: 4px; font-weight: bold; font-size: 14px; }
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body onload="inicializar()">
 
     <div class="container">
-        <h1>🏆 BRASILEIRÃO EFOOTBALL</h1>
-        <p>LIGA OFICIAL X1 - bringmetheorizo, EoLuckyzinJr, Vitor90show, VitinhoRJ, Bened, FPETOP, W7masterzz</p>
+        <h1>Cariocão eFootball</h1>
+        <p>Confrontos em Turno e Returno (2 jogos contra cada adversário)</p>
 
+        <h3 style="color: #ffcc00; margin-top: 25px;">Partidas e Placares</h3>
         <div class="jogos-container" id="jogos"></div>
 
+        <h3 style="color: #ffcc00; margin-top: 35px;">Tabela de Classificação</h3>
         <table id="tabela">
             <thead>
                 <tr>
@@ -47,80 +62,105 @@
     </div>
 
     <script>
-        const jogadores = ["bringmetheorizo", "EoLuckyzinJr", "Vitor90show", "VitinhoRJ", "Bened", "FPETOP", "W7masterzz"];
-        let confrontos = [];
+        const jogadores = [
+            { nome: "VITOR90SHOW", time: "Barcelona", escudo: "barcelona.png" },
+            { nome: "VITINHORJ", time: "Arsenal", escudo: "arsenal.png" },
+            { nome: "BRINGMETHEORIZO", time: "Inter Milan", escudo: "inter.png" },
+            { nome: "EOLUCKYZINJR", time: "Milan", escudo: "milan.png" },
+            { nome: "BENED", time: "A Definir", escudo: "padrao.png" },
+            { nome: "W7MASTERZZ", time: "Paris Saint-Germain", escudo: "psg.png" }
+        ];
+
+        let totalConfrontosCount = 0;
 
         function gerarConfrontos() {
-            confrontos = [];
+            const divJogos = document.getElementById('jogos');
+            divJogos.innerHTML = ""; 
+            let globalIndex = 0;
+
             for (let i = 0; i < jogadores.length; i++) {
                 for (let j = i + 1; j < jogadores.length; j++) {
-                    confrontos.push([jogadores[i], jogadores[j]]);
-                    confrontos.push([jogadores[j], jogadores[i]]);
+                    let p1 = jogadores[i];
+                    let p2 = jogadores[j];
+
+                    let blocoHTML = `<div class="confronto-bloco">
+                        <div class="confronto-titulo">${p1.nome} (${p1.time}) vs ${p2.nome} (${p2.time})</div>`;
+
+                    // 2 partidas: 1º jogo (p1 casa, p2 fora) e 2º jogo (p2 casa, p1 fora)
+                    for (let partidaNum = 1; partidaNum <= 2; partidaNum++) {
+                        let mandante = (partidaNum === 1) ? p1 : p2;
+                        let visitante = (partidaNum === 1) ? p2 : p1;
+
+                        blocoHTML += `
+                            <div class="jogo-item">
+                                <div class="team-info left">
+                                    <img src="${mandante.escudo}" class="escudo" onerror="this.src='https://via.placeholder.com/24/333/fff?text=X'">
+                                    <span><b>${mandante.nome}</b></span>
+                                </div>
+                                <div>
+                                    <input type="number" id="s1-${globalIndex}" data-time1="${mandante.nome}" data-time2="${visitante.nome}" oninput="atualizarTabela()" min="0"> x 
+                                    <input type="number" id="s2-${globalIndex}" data-time1="${mandante.nome}" data-time2="${visitante.nome}" oninput="atualizarTabela()" min="0">
+                                </div>
+                                <div class="team-info right">
+                                    <span><b>${visitante.nome}</b></span>
+                                    <img src="${visitante.escudo}" class="escudo" onerror="this.src='https://via.placeholder.com/24/333/fff?text=X'">
+                                </div>
+                            </div>
+                        `;
+                        globalIndex++;
+                    }
+                    blocoHTML += `</div>`;
+                    divJogos.innerHTML += blocoHTML;
                 }
             }
+            totalConfrontosCount = globalIndex;
         }
 
         function inicializar() {
             gerarConfrontos();
-            const divJogos = document.getElementById('jogos');
-            divJogos.innerHTML = ""; 
-
-            confrontos.forEach((par, i) => {
-                if (i % 2 === 0 && i !== 0) {
-                    divJogos.innerHTML += '<hr style="border: 0; border-top: 1px dashed #444; margin: 15px 0;">';
-                }
-                divJogos.innerHTML += `
-                    <div class="jogo-item">
-                        <span>${par[0]}</span>
-                        <div>
-                            <input type="number" id="s1-${i}" oninput="atualizarTabela()" min="0"> x 
-                            <input type="number" id="s2-${i}" oninput="atualizarTabela()" min="0">
-                        </div>
-                        <span>${par[1]}</span>
-                    </div>
-                `;
-            });
             atualizarTabela();
         }
 
         function atualizarTabela() {
             let stats = {};
-            jogadores.forEach(j => stats[j] = { pts: 0, pj: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0 });
+            jogadores.forEach(j => stats[j.nome] = { pts: 0, pj: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, escudo: j.escudo, time: j.time });
 
-            confrontos.forEach((par, i) => {
+            for (let i = 0; i < totalConfrontosCount; i++) {
                 let el1 = document.getElementById(`s1-${i}`);
                 let el2 = document.getElementById(`s2-${i}`);
                 
                 if (el1 && el2 && el1.value.trim() !== "" && el2.value.trim() !== "") {
                     let s1 = parseInt(el1.value);
                     let s2 = parseInt(el2.value);
-                    let timeA = par[0];
-                    let timeB = par[1];
+                    let timeA = el1.getAttribute("data-time1");
+                    let timeB = el1.getAttribute("data-time2");
 
-                    stats[timeA].pj++;
-                    stats[timeB].pj++;
+                    if (stats[timeA] && stats[timeB]) {
+                        stats[timeA].pj++;
+                        stats[timeB].pj++;
 
-                    stats[timeA].gp += s1;
-                    stats[timeA].gc += s2;
-                    stats[timeB].gp += s2;
-                    stats[timeB].gc += s1;
+                        stats[timeA].gp += s1;
+                        stats[timeA].gc += s2;
+                        stats[timeB].gp += s2;
+                        stats[timeB].gc += s1;
 
-                    if (s1 > s2) { 
-                        stats[timeA].pts += 3; 
-                        stats[timeA].v++; 
-                        stats[timeB].d++; 
-                    } else if (s2 > s1) { 
-                        stats[timeB].pts += 3; 
-                        stats[timeB].v++; 
-                        stats[timeA].d++; 
-                    } else { 
-                        stats[timeA].pts += 1; 
-                        stats[timeA].e++;
-                        stats[timeB].pts += 1; 
-                        stats[timeB].e++;
+                        if (s1 > s2) { 
+                            stats[timeA].pts += 3; 
+                            stats[timeA].v++; 
+                            stats[timeB].d++; 
+                        } else if (s2 > s1) { 
+                            stats[timeB].pts += 3; 
+                            stats[timeB].v++; 
+                            stats[timeA].d++; 
+                        } else { 
+                            stats[timeA].pts += 1; 
+                            stats[timeA].e++;
+                            stats[timeB].pts += 1; 
+                            stats[timeB].e++;
+                        }
                     }
                 }
-            });
+            }
 
             let ranking = Object.keys(stats).map(name => ({ 
                 name, ...stats[name], sg: stats[name].gp - stats[name].gc 
@@ -134,16 +174,19 @@
             ranking.forEach((item, index) => {
                 corpo.innerHTML += `
                     <tr>
-                        <td>${index + 1}º</td>
-                        <td><b>${item.name}</b></td>
-                        <td>${item.pts}</td>
+                        <td><b>#${index + 1}</b></td>
+                        <td style="text-align: left; padding-left: 15px; display: flex; align-items: center; gap: 10px; border: none;">
+                            <img src="${item.escudo}" class="escudo" onerror="this.src='https://via.placeholder.com/24/333/fff?text=X'">
+                            <span><b>${item.name}</b> <small style="color: #888;">(${item.time})</small></span>
+                        </td>
+                        <td><b>${item.pts}</b></td>
                         <td>${item.pj}</td>
                         <td>${item.v}</td>
                         <td>${item.e}</td>
                         <td>${item.d}</td>
                         <td>${item.gp}</td>
                         <td>${item.gc}</td>
-                        <td>${item.sg}</td>
+                        <td>${item.sg > 0 ? '+' + item.sg : item.sg}</td>
                     </tr>
                 `;
             });
